@@ -1,0 +1,2 @@
+INSERT INTO usuarios (username, senha, usuario_email, usuario_imagem_url, localizacao, horta_tipo) VALUES
+('moderador_exemplo', 'senha_hash_aqui', 'moderador.exemplo@email.com', 'http://example.com/imagem_moderador.jpg', 'Cidade Exemplo, Estado Exemplo', 1);
