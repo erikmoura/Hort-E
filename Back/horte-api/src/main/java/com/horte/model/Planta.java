@@ -72,7 +72,6 @@ public class Planta {
     @Schema(description = "A necessidade de luz solar da planta (ex: Sol Pleno, Meia Sombra, Sombra).", example = "Sol pleno (mínimo de 6 horas de sol direto)")
     private String luzSolar;
 
-    // Relacionamento Many-to-Many com Guia (através de GuiasXPlantas)
     @ManyToMany(mappedBy = "plantasAssociadas")
     @Schema(description = "Conjunto de guias associados a esta planta.")
     @JsonBackReference("guia-plantas")

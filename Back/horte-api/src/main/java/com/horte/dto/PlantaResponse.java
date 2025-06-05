@@ -1,9 +1,13 @@
 package com.horte.dto;
 
+import com.horte.model.Guia;
 import com.horte.model.Planta;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
@@ -46,6 +50,9 @@ public class PlantaResponse {
     @Schema(description = "Necessidade de luz solar.", example = "Sol pleno")
     private String luzSolar;
 
+    @Schema(description = "Conjunto de IDs dos guias associados a esta planta.", example = "[1, 3, 5]")
+    private Set<Long> guiasAssociadosIds;
+
     public static PlantaResponse fromEntity(Planta planta) {
         PlantaResponse dto = new PlantaResponse();
         dto.setId(planta.getId());
@@ -59,6 +66,15 @@ public class PlantaResponse {
         dto.setLocalPlantio(planta.getLocalPlantio());
         dto.setClima(planta.getClima());
         dto.setLuzSolar(planta.getLuzSolar());
+
+        if (planta.getGuias() != null) {
+            dto.setGuiasAssociadosIds(
+                planta.getGuias().stream()
+                    .map(Guia::getId)
+                    .collect(Collectors.toSet())
+            );
+        }
+
         return dto;
     }
 }

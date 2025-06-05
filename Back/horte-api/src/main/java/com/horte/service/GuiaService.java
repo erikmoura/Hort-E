@@ -3,6 +3,7 @@ package com.horte.service;
 import com.horte.model.Usuario;
 import com.horte.model.Guia;
 import com.horte.model.Planta;
+import com.horte.dto.GuiaResponse;
 
 import com.horte.repository.UsuarioRepository;
 import com.horte.repository.GuiaRepository;
@@ -10,11 +11,14 @@ import com.horte.repository.PlantaRepository;
 
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class GuiaService {
@@ -26,12 +30,36 @@ public class GuiaService {
     @Autowired
     private PlantaRepository plantaRepository;
 
-    public List<Guia> listarTodosGuias() {
-        return guiaRepository.findAll();
+    public List<GuiaResponse> listarTodosGuiasDTO() {
+        return guiaRepository.findAll().stream()
+                .map(GuiaResponse::fromEntity)
+                .collect(Collectors.toList());
     }
 
-    public Optional<Guia> buscarGuiaPorId(Long id) {
-        return guiaRepository.findById(id);
+    public Optional<GuiaResponse> buscarGuiaPorIdDTO(Long id) {
+        return guiaRepository.findById(id)
+                .map(GuiaResponse::fromEntity);
+    }
+
+    public List<GuiaResponse> buscarGuiasPorFiltro(String guiaTipo) {
+        Specification<Guia> spec = (root, query, criteriaBuilder) -> criteriaBuilder.conjunction();
+
+        // Filtro para guia_tipo
+        if (StringUtils.hasText(guiaTipo) && !"todos".equalsIgnoreCase(guiaTipo)) {
+            try {
+                Integer tipoValue = Integer.parseInt(guiaTipo);
+                spec = spec.and((root, query, criteriaBuilder) ->
+                        criteriaBuilder.equal(root.get("guiaTipo"), tipoValue));
+            } catch (NumberFormatException e) {
+                System.err.println("Valor inválido para guiaTipo: " + guiaTipo + ". Ignorando filtro.");
+            }
+        }
+        // Futuros filtrosno padrão
+        // if (StringUtils.hasText(outroFiltro) && !"todos".equalsIgnoreCase(outroFiltro)) { ... }
+
+        return guiaRepository.findAll(spec).stream()
+                .map(GuiaResponse::fromEntity)
+                .collect(Collectors.toList());
     }
 
     @Transactional
@@ -77,8 +105,6 @@ public class GuiaService {
         } else {
             System.out.println("Planta " + plantaId + " já está associada ao guia " + guiaId);
         }
-
-
         return guiaRepository.save(guia);
     }
 
@@ -95,7 +121,6 @@ public class GuiaService {
         } else {
             System.out.println("Planta " + plantaId + " não estava associada ao guia " + guiaId);
         }
-
         return guiaRepository.save(guia);
     }
 }

@@ -18,7 +18,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
@@ -30,8 +29,6 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
-
-// Controlador REST para guia de plantas.
 
 @RestController
 @RequestMapping("/api/guias")
@@ -52,11 +49,7 @@ public class GuiaController {
                  content = @Content(schema = @Schema(implementation = GuiaResponse.class)))
     @GetMapping
     public ResponseEntity<List<GuiaResponse>> getAllGuias() {
-        List<Guia> guias = guiaService.listarTodosGuias();
-        // Converte a lista de entidades Guia para uma lista de DTOs GuiaResponse.
-        List<GuiaResponse> guiasDTO = guias.stream()
-                                             .map(GuiaResponse::fromEntity)
-                                             .collect(Collectors.toList());
+        List<GuiaResponse> guiasDTO = guiaService.listarTodosGuiasDTO();
         return ResponseEntity.ok(guiasDTO);
     }
 
@@ -70,10 +63,32 @@ public class GuiaController {
     @ApiResponse(responseCode = "404", description = "Guia não encontrado")
     @GetMapping("/{id}")
     public ResponseEntity<GuiaResponse> getGuiaById(@PathVariable Long id) {
-        Optional<Guia> guia = guiaService.buscarGuiaPorId(id);
-        return guia.map(GuiaResponse::fromEntity)
-                   .map(ResponseEntity::ok)
-                   .orElse(ResponseEntity.notFound().build());
+        Optional<GuiaResponse> guiaResponse = guiaService.buscarGuiaPorIdDTO(id);
+        return guiaResponse
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+// Novo Endpoint de Filtragem
+
+    @Operation(
+        summary = "Listar guias com filtros opcionais",
+        description = "Retorna uma lista de guias que correspondem aos critérios de filtro fornecidos. " +
+                      "Se um filtro for 'todos' (case-insensitive) ou vazio, ele será ignorado. " +
+                      "Este endpoint é de acesso público.",
+        parameters = {
+            @Parameter(name = "guiaTipo", description = "Filtra por tipo de ambiente do guia (0 para interior, 1 para exterior, 2 para ambos). Use 'todos' ou deixe vazio para ignorar este filtro.", example = "0", required = false)
+            // Futuros parâmetros de filtro podem ser adicionados aqui
+        }
+    )
+    @ApiResponse(responseCode = "200", description = "Lista de guias filtrada retornada com sucesso",
+                 content = @Content(schema = @Schema(implementation = GuiaResponse.class)))
+    @GetMapping("/filtrar")
+    public ResponseEntity<List<GuiaResponse>> getFilteredGuias(
+            @RequestParam(required = false) String guiaTipo) {
+        
+        List<GuiaResponse> guiasFiltrados = guiaService.buscarGuiasPorFiltro(guiaTipo);
+        return ResponseEntity.ok(guiasFiltrados);
     }
 
     @Operation(
@@ -93,7 +108,7 @@ public class GuiaController {
         BeanUtils.copyProperties(guiaCreationDTO, guia);
 
         Usuario autor = usuarioService.buscarPorUsername(currentUser.getUsername())
-                                             .orElseThrow(() -> new IllegalArgumentException("Usuário autenticado não encontrado."));
+                                      .orElseThrow(() -> new IllegalArgumentException("Usuário autenticado não encontrado."));
         Guia novoGuia = guiaService.criarGuia(guia, autor.getId());
         return new ResponseEntity<>(GuiaResponse.fromEntity(novoGuia), HttpStatus.CREATED);
     }
@@ -109,8 +124,7 @@ public class GuiaController {
     @ApiResponse(responseCode = "404", description = "Guia não encontrado")
     @ApiResponse(responseCode = "401", description = "Não autenticado")
     @ApiResponse(responseCode = "403", description = "Não autorizado (não é o autor ou não tem ROLE_ADMIN)")
-    // Verifica se o usuário tem a role 'ADMIN' OU se o username do autor do guia é o mesmo username do usuário autenticado.
-    @PreAuthorize("hasRole('ADMIN') or @guiaService.buscarGuiaPorId(#id).orElse(null)?.autor?.username == authentication.name")
+    @PreAuthorize("hasRole('ADMIN') or @guiaService.buscarGuiaPorIdDTO(#id).orElse(null)?.autorId == @usuarioService.buscarPorUsername(authentication.name).orElse(null)?.id") // Ajuste aqui para usar o DTO
     @PutMapping("/{id}")
     public ResponseEntity<GuiaResponse> updateGuia(@PathVariable Long id, @RequestBody Guia guia) {
         try {
@@ -131,7 +145,7 @@ public class GuiaController {
     @ApiResponse(responseCode = "404", description = "Guia não encontrado")
     @ApiResponse(responseCode = "401", description = "Não autenticado")
     @ApiResponse(responseCode = "403", description = "Não autorizado (não é o autor ou não tem ROLE_ADMIN)")
-    @PreAuthorize("hasRole('ADMIN') or @guiaService.buscarGuiaPorId(#id).orElse(null)?.autor?.username == authentication.name")
+    @PreAuthorize("hasRole('ADMIN') or @guiaService.buscarGuiaPorIdDTO(#id).orElse(null)?.autorId == @usuarioService.buscarPorUsername(authentication.name).orElse(null)?.id") // Ajuste aqui para usar o DTO
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteGuia(@PathVariable Long id) {
         try {
@@ -156,7 +170,7 @@ public class GuiaController {
     @ApiResponse(responseCode = "404", description = "Guia ou Planta não encontrados")
     @ApiResponse(responseCode = "401", description = "Não autenticado")
     @ApiResponse(responseCode = "403", description = "Não autorizado (não é ADMIN nem o autor do guia)")
-    @PreAuthorize("hasRole('ADMIN') or @guiaService.buscarGuiaPorId(#guiaId).orElse(null)?.autor?.username == authentication.name")
+    @PreAuthorize("hasRole('ADMIN') or @guiaService.buscarGuiaPorIdDTO(#guiaId).orElse(null)?.autorId == @usuarioService.buscarPorUsername(authentication.name).orElse(null)?.id") // Ajuste aqui para usar o DTO
     @PostMapping("/{guiaId}/associar-planta/{plantaId}")
     public ResponseEntity<GuiaResponse> associarPlanta(@PathVariable Long guiaId, @PathVariable Long plantaId) {
         try {
@@ -181,7 +195,7 @@ public class GuiaController {
     @ApiResponse(responseCode = "404", description = "Guia ou Planta não encontrados")
     @ApiResponse(responseCode = "401", description = "Não autenticado")
     @ApiResponse(responseCode = "403", description = "Não autorizado (não é ADMIN nem o autor do guia)")
-    @PreAuthorize("hasRole('ADMIN') or @guiaService.buscarGuiaPorId(#guiaId).orElse(null)?.autor?.username == authentication.name")
+    @PreAuthorize("hasRole('ADMIN') or @guiaService.buscarGuiaPorIdDTO(#guiaId).orElse(null)?.autorId == @usuarioService.buscarPorUsername(authentication.name).orElse(null)?.id") // Ajuste aqui para usar o DTO
     @DeleteMapping("/{guiaId}/desassociar-planta/{plantaId}")
     public ResponseEntity<GuiaResponse> desassociarPlanta(@PathVariable Long guiaId, @PathVariable Long plantaId) {
         try {

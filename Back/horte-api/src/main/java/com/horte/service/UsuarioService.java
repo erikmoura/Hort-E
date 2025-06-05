@@ -6,14 +6,17 @@ import com.horte.model.Usuario;
 import com.horte.repository.RoleRepository;
 import com.horte.repository.UsuarioRepository;
 import com.horte.dto.UsuarioProfileResponse;
+import com.horte.dto.UsuarioResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 public class UsuarioService {
@@ -56,14 +59,39 @@ public class UsuarioService {
         return usuarioRepository.findByUsername(username);
     }
 
-    /**
-     * Busca um usuário pelo username e retorna um DTO com suas informações de perfil.
-     * @param username O username do usuário a ser buscado.
-     * @return Um Optional contendo UsuarioProfileResponse se o usuário for encontrado, ou vazio se não for.
-     */
     public Optional<UsuarioProfileResponse> buscarPerfilUsuarioPorUsername(String username) {
         return usuarioRepository.findByUsername(username)
             .map(UsuarioProfileResponse::fromEntity);
+    }
+
+    public Optional<UsuarioProfileResponse> buscarPerfilUsuarioPorId(Long id) {
+        return usuarioRepository.findById(id)
+            .map(UsuarioProfileResponse::fromEntity);
+    }
+
+    // Listar todos os usuários (retornando DTOs)
+    public List<UsuarioResponse> listarTodosUsuarios() {
+        return usuarioRepository.findAll().stream()
+                .map(this::mapUsuarioToUsuarioResponse)
+                .collect(Collectors.toList());
+    }
+
+    // Tornar um usuário administrador
+    @Transactional
+    public UsuarioResponse tornarAdministrador(Long id) {
+        Usuario usuario = usuarioRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Usuário não encontrado com ID: " + id));
+
+        Role adminRole = roleRepository.findByName(RoleName.ROLE_ADMIN)
+                .orElseThrow(() -> new RuntimeException("Erro: Role de administrador não encontrada."));
+
+        if (!usuario.getRoles().contains(adminRole)) {
+            usuario.addRole(adminRole);
+            usuarioRepository.save(usuario);
+        } else {
+            System.out.println("Usuário com ID " + id + " já é administrador.");
+        }
+        return mapUsuarioToUsuarioResponse(usuario);
     }
 
     @Transactional
@@ -74,7 +102,6 @@ public class UsuarioService {
             usuarioExistente.setUsuarioImagemUrl(usuarioAtualizado.getUsuarioImagemUrl());
             usuarioExistente.setLocalizacao(usuarioAtualizado.getLocalizacao());
             usuarioExistente.setHortaTipo(usuarioAtualizado.getHortaTipo());
-            // Não atualiza as roles aqui. Nem as senhas. Se for mudar faz em outro método.
             return usuarioRepository.save(usuarioExistente);
         }).orElseThrow(() -> new IllegalArgumentException("Usuário não encontrado com ID: " + id));
     }
@@ -85,5 +112,20 @@ public class UsuarioService {
             throw new IllegalArgumentException("Usuário não encontrado com ID: " + id);
         }
         usuarioRepository.deleteById(id);
+    }
+
+    // Método auxiliar para mapear Usuario para UsuarioResponse
+    private UsuarioResponse mapUsuarioToUsuarioResponse(Usuario usuario) {
+        UsuarioResponse dto = new UsuarioResponse();
+        dto.setId(usuario.getId());
+        dto.setUsername(usuario.getUsername());
+        dto.setUsuarioEmail(usuario.getUsuarioEmail());
+        dto.setUsuarioImagemUrl(usuario.getUsuarioImagemUrl());
+        dto.setLocalizacao(usuario.getLocalizacao());
+        dto.setHortaTipo(usuario.getHortaTipo());
+        dto.setRoles(usuario.getRoles().stream()
+                            .map(role -> role.getName().name())
+                            .collect(Collectors.toSet())); 
+        return dto;
     }
 }

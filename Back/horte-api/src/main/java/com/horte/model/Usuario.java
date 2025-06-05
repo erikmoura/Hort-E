@@ -93,4 +93,8 @@ public class Usuario {
         this.postsCriados = new ArrayList<>();
         this.comentariosFeitos = new ArrayList<>();
     }
+
+    public void addRole(Role role) {
+        this.roles.add(role);
+    }
 }

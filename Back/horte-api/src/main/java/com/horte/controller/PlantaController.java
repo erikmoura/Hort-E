@@ -14,7 +14,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -24,8 +23,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-
-// Controlador REST que gerencia informações sobre plantas.
 
 @RestController
 @RequestMapping("/api/plantas")
@@ -43,12 +40,8 @@ public class PlantaController {
                  content = @Content(schema = @Schema(implementation = PlantaResponse.class)))
     @GetMapping
     public ResponseEntity<List<PlantaResponse>> getAllPlantas() {
-        List<Planta> plantas = plantaService.listarTodasPlantas();
-        // Converte a lista de entidades 'Planta' em uma lista de DTOs 'PlantaResponse'.
-        List<PlantaResponse> plantaResponses = plantas.stream()
-            .map(PlantaResponse::fromEntity)
-            .collect(Collectors.toList());
-        return ResponseEntity.ok(plantaResponses);
+        List<PlantaResponse> plantas = plantaService.listarTodasPlantasDTO();
+        return ResponseEntity.ok(plantas);
     }
 
     @Operation(
@@ -60,12 +53,45 @@ public class PlantaController {
                  content = @Content(schema = @Schema(implementation = PlantaResponse.class)))
     @ApiResponse(responseCode = "404", description = "Planta não encontrada")
     @GetMapping("/{id}")
-    public ResponseEntity<PlantaResponse> getPlantaById(@PathVariable Long id) { 
-        Optional<Planta> planta = plantaService.buscarPlantaPorId(id);
+    public ResponseEntity<PlantaResponse> getPlantaById(@PathVariable Long id) {
+        Optional<PlantaResponse> plantaResponse = plantaService.buscarPlantaPorIdDTO(id);
 
-        return planta.map(PlantaResponse::fromEntity)
+        return plantaResponse
             .map(ResponseEntity::ok)
             .orElse(ResponseEntity.notFound().build());
+    }
+
+// Endpoint de Filtragem
+
+    @Operation(
+        summary = "Listar plantas com filtros opcionais",
+        description = "Retorna uma lista de plantas que correspondem aos critérios de filtro fornecidos. " +
+                      "Se um filtro for 'todos' (case-insensitive), ele será ignorado. " +
+                      "Este endpoint é de acesso público.",
+        parameters = {
+            @Parameter(name = "categoria", description = "Filtra por categoria da planta (ex: Fruta, Erva, Flor, Vegetal). Use 'todos' para ignorar este filtro.", example = "Fruta", required = false),
+            @Parameter(name = "tipoSolo", description = "Filtra por tipo de solo ideal (ex: Argiloso, Arenoso). Use 'todos' para ignorar este filtro.", example = "Bem drenado", required = false),
+            @Parameter(name = "irrigacao", description = "Filtra por necessidades de irrigação (ex: Diária, Semanal). Use 'todos' para ignorar este filtro.", example = "Regas regulares", required = false),
+            @Parameter(name = "localPlantio", description = "Filtra por local de plantio recomendado (ex: Vaso, Horta). Use 'todos' para ignorar este filtro.", example = "Vaso", required = false),
+            @Parameter(name = "clima", description = "Filtra por clima ideal (ex: Tropical, Temperado). Use 'todos' para ignorar este filtro.", example = "Quente e úmido", required = false),
+            @Parameter(name = "luzSolar", description = "Filtra por necessidade de luz solar (ex: Sol Pleno, Meia Sombra). Use 'todos' para ignorar este filtro.", example = "Sol pleno", required = false)
+        }
+    )
+    @ApiResponse(responseCode = "200", description = "Lista de plantas filtrada retornada com sucesso",
+                 content = @Content(schema = @Schema(implementation = PlantaResponse.class)))
+    @GetMapping("/filtrar")
+    public ResponseEntity<List<PlantaResponse>> getFilteredPlantas(
+            @RequestParam(required = false) String categoria,
+            @RequestParam(required = false) String tipoSolo,
+            @RequestParam(required = false) String irrigacao,
+            @RequestParam(required = false) String localPlantio,
+            @RequestParam(required = false) String clima,
+            @RequestParam(required = false) String luzSolar) {
+
+        List<PlantaResponse> plantasFiltradas = plantaService.buscarPlantasPorFiltro(
+                categoria, tipoSolo, irrigacao, localPlantio, clima, luzSolar
+        );
+        return ResponseEntity.ok(plantasFiltradas);
     }
 
     @Operation(
@@ -78,7 +104,6 @@ public class PlantaController {
     @ApiResponse(responseCode = "400", description = "Requisição inválida")
     @ApiResponse(responseCode = "401", description = "Não autenticado")
     @ApiResponse(responseCode = "403", description = "Não autorizado (requer ROLE_ADMIN)")
-
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
     public ResponseEntity<PlantaResponse> createPlanta(@Valid @RequestBody PlantaCreateRequest plantaCreationDTO) {
