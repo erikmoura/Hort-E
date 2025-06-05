@@ -9,8 +9,6 @@ import java.util.Optional;
 
 @Repository
 public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
-    // JpaRepository<Entidade, TipoDoID> fornece métodos CRUD básicos (save, findById, findAll, delete, etc.)
-
     Optional<Usuario> findByUsername(String username); // Para login, busca por username
     Optional<Usuario> findByUsuarioEmail(String usuarioEmail); // Para verificar email duplicado no cadastro
 }

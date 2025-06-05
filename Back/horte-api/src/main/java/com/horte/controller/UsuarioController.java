@@ -74,7 +74,7 @@ public class UsuarioController {
     @ApiResponse(responseCode = "401", description = "Não autenticado")
     @ApiResponse(responseCode = "403", description = "Não autorizado (requer ROLE_ADMIN)")
     @PreAuthorize("hasRole('ADMIN')")
-    @GetMapping("/admin/all") // Novo endpoint para listar todos os usuários (ADMIN)
+    @GetMapping("/admin/all")
     public ResponseEntity<List<UsuarioResponse>> getAllUsersAdmin() {
         List<UsuarioResponse> usuarios = usuarioService.listarTodosUsuarios();
         return ResponseEntity.ok(usuarios);

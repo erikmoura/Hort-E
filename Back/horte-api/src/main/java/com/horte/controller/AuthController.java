@@ -37,8 +37,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 @Tag(name = "Autenticação", description = "Endpoints para registro e login de usuários na API Plant Guide")
 public class AuthController {
 
-    // Seção de injeção de dependências.
-
     @Autowired
     private UsuarioService usuarioService;
 
@@ -52,7 +50,6 @@ public class AuthController {
     private CustomUserDetailsService userDetailsService;
 
     @Operation(
-        // As anotações @Operation e @ApiResponse do Swagger já descrevem bem o propósito do método e suas respostas.
         summary = "Registrar um novo usuário",
         description = "Cria uma nova conta de usuário no sistema Plant Guide com as informações fornecidas.",
         responses = {
@@ -72,14 +69,11 @@ public class AuthController {
     public ResponseEntity<?> registerUser(@Valid @RequestBody UsuarioRegisterRequest registerRequest) {
         try {
             Usuario usuario = new Usuario();
-            // Copia as propriedades do DTO para um usuário
             BeanUtils.copyProperties(registerRequest, usuario);
 
-            // Chama o serviço.
             Usuario novoUsuario = usuarioService.cadastrarUsuario(usuario);
             
             UsuarioResponse responseDto = new UsuarioResponse();
-            // Copia de volta para o DTO
             BeanUtils.copyProperties(novoUsuario, responseDto);
 
             return new ResponseEntity<>(responseDto, HttpStatus.CREATED);
@@ -107,20 +101,16 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
         try {
-            // Processo de segurança do spring. Cria um token com as informações fornecidas para passar para o cliente e ele provar que está logado.
             Authentication authentication = authenticationManager.authenticate(
                         new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword())
             );
 
             SecurityContextHolder.getContext().setAuthentication(authentication);
             
-            // Obtém os detalhes completos do usuário autenticado, incluindo suas permissões.
             UserDetails userDetails = userDetailsService.loadUserByUsername(loginRequest.getUsername());
             
-            // Gera o JWT usando os detalhes do usuário, que será retornado ao cliente.
             String jwt = jwtTokenUtil.generateToken(userDetails);
 
-            // Busca outras informmações do usuário para colocar na resposta do login para uso posterior.
             Usuario usuario = usuarioService.buscarPorUsername(userDetails.getUsername())
                                         .orElseThrow(() -> new BadCredentialsException("Usuário não encontrado após autenticação."));
 
