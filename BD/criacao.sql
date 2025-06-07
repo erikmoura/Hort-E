@@ -5,7 +5,7 @@ CREATE TABLE usuarios (
     usuario_email VARCHAR(255) NOT NULL UNIQUE,
     usuario_imagem_url VARCHAR(255),
     localizacao VARCHAR(255),
-    horta_tipo INT
+    horta_tipo INT -- 0 para interior, 1 para exterior, 2 para ambos
 );
 
 CREATE TABLE plantas (
