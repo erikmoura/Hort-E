@@ -69,12 +69,24 @@ public class PlantaController {
                       "Se um filtro for 'todos' (case-insensitive), ele será ignorado. " +
                       "Este endpoint é de acesso público.",
         parameters = {
-            @Parameter(name = "categoria", description = "Filtra por categoria da planta (ex: Fruta, Erva, Flor, Vegetal). Use 'todos' para ignorar este filtro.", example = "Fruta", required = false),
-            @Parameter(name = "tipoSolo", description = "Filtra por tipo de solo ideal (ex: Argiloso, Arenoso). Use 'todos' para ignorar este filtro.", example = "Bem drenado", required = false),
-            @Parameter(name = "irrigacao", description = "Filtra por necessidades de irrigação (ex: Diária, Semanal). Use 'todos' para ignorar este filtro.", example = "Regas regulares", required = false),
-            @Parameter(name = "localPlantio", description = "Filtra por local de plantio recomendado (ex: Vaso, Horta). Use 'todos' para ignorar este filtro.", example = "Vaso", required = false),
-            @Parameter(name = "clima", description = "Filtra por clima ideal (ex: Tropical, Temperado). Use 'todos' para ignorar este filtro.", example = "Quente e úmido", required = false),
-            @Parameter(name = "luzSolar", description = "Filtra por necessidade de luz solar (ex: Sol Pleno, Meia Sombra). Use 'todos' para ignorar este filtro.", example = "Sol pleno", required = false)
+            @Parameter(name = "categoria", description = "Filtra por categoria da planta.", 
+                       example = "Fruta", required = false,
+                       schema = @Schema(type = "string", allowableValues = {"todos", "Erva", "Hortaliça", "Fruto", "Raiz", "Bulbo", "Tubérculo", "Leguminosa"})),
+            @Parameter(name = "tipoSolo", description = "Filtra por tipo de solo ideal.", 
+                       example = "Bem drenado", required = false,
+                       schema = @Schema(type = "string", allowableValues = {"todos", "Fértil e Bem Drenado", "Rico em Matéria Orgânica (Húmus)", "Leve e Bem Drenado", "Arenoso e Bem Drenado (Pouco Fértil / Seco)", "Rico e Profundo", "Rico e Levemente Ácido", "Rico em Matéria Orgânica e Bem Drenado", "Bem Drenado (Até Pobre)"})),
+            @Parameter(name = "irrigacao", description = "Filtra por necessidades de irrigação.", 
+                       example = "Diária", required = false,
+                       schema = @Schema(type = "string", allowableValues = {"todos", "diária", "a cada 1-2 dias", "a cada 2-3 dias", "a cada 3-5 dias", "semanal", "a cada 7-15 dias"})),
+            @Parameter(name = "localPlantio", description = "Filtra por local de plantio recomendado.", 
+                       example = "Vaso", required = false,
+                       schema = @Schema(type = "string", allowableValues = {"todos", "Apartamentos e Casas (Sol Pleno)", "Todos os Locais (Ideal em Vasos)", "Varandas e Hortas Elevadas", "Janelas, Varandas", "Vasos ou Jardineiras", "Vasos Grandes e Quintais/Jardins", "Vasos (Local Ensolarado)", "Varandas e Quintais Ensolarados", "Varandas e Jardineiras", "Vasos e Canteiros (Sombreados/Luz Difusa)", "Vasos e Jardineiras", "Quintais e Hortas Amplas", "Varanda, Dentro (Perto de Janela) e Quintal"})),
+            @Parameter(name = "clima", description = "Filtra por clima ideal.", 
+                       example = "Quente e úmido", required = false,
+                       schema = @Schema(type = "string", allowableValues = {"todos", "Mediterrâneo", "Temperado a Subtropical", "Temperado", "Tropical a Subtropical", "Temperado a Quente", "Tropical", "Temperado a Frio", "Tropical a Temperado", "Tropical a Quente"})),
+            @Parameter(name = "luzSolar", description = "Filtra por necessidade de luz solar.", 
+                       example = "Sol pleno", required = false,
+                       schema = @Schema(type = "string", allowableValues = {"todos", "Sol pleno (4-6h)", "Meia-sombra", "Sol pleno ou meia-sombra", "Sol pleno (6-8h)", "Sol pleno (6-7h)", "Sol pleno (4h+) (tolera um pouco de sombra)"}))
         }
     )
     @ApiResponse(responseCode = "200", description = "Lista de plantas filtrada retornada com sucesso",
@@ -89,8 +101,7 @@ public class PlantaController {
             @RequestParam(required = false) String luzSolar) {
 
         List<PlantaResponse> plantasFiltradas = plantaService.buscarPlantasPorFiltro(
-                categoria, tipoSolo, irrigacao, localPlantio, clima, luzSolar
-        );
+                categoria, tipoSolo, irrigacao, localPlantio, clima, luzSolar);
         return ResponseEntity.ok(plantasFiltradas);
     }
 
