@@ -1,11 +1,12 @@
 import React from 'react';
-import { View, StyleSheet, TextInput, Dimensions } from 'react-native';
+import { Dimensions, StyleSheet, TextInput, View } from 'react-native';
 
 type PropsBotaoInput = {
   label: string;
   value: string;
   onChangeText: (text: string) => void;
   secureTextEntry?: boolean;
+  onPress?: () => void;
 };
 
 const { height, width } = Dimensions.get('window');
@@ -15,6 +16,7 @@ export default function BotaoInput({
   value,
   onChangeText,
   secureTextEntry = false,
+  onPress
 }: PropsBotaoInput) {
   return (
     <View style={styles.container}>
@@ -25,6 +27,7 @@ export default function BotaoInput({
         value={value}
         onChangeText={onChangeText}
         secureTextEntry={secureTextEntry}
+        onPress={onPress}
       />
     </View>
   );

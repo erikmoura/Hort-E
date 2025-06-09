@@ -1,8 +1,8 @@
-import React from 'react';
-import { View, Text, StyleSheet, Dimensions } from 'react-native';
 import { useRouter } from 'expo-router';
-import BotaoVerde from '../../components/BotaoVerde';
+import React from 'react';
+import { Dimensions, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import BannerInicial from '../../components/BannerInicial';
+import BotaoVerde from '../../components/BotaoVerde';
 
 const { height, width } = Dimensions.get('window');
 
@@ -16,12 +16,17 @@ export default function LandingPage() {
       <BannerInicial />
 
       <View style={styles.button}>
-        <BotaoVerde label="Entrar" onPress={() => router.push('../screens/(auth)/login')}/>
+        <BotaoVerde label="Entrar" onPress={() => router.push('/screens/(auth)/login')}/>
       </View>
 
-      <Text style={styles.footerText}>
-        Não possui conta? <Text style={styles.linkText}>Cadastre-se.</Text>
-      </Text>
+      <View style={styles.footerText}>
+        <Text>
+          Não possui conta?
+        </Text>
+        <TouchableOpacity onPress={() => router.push('/screens/(auth)/register')}>
+          <Text style={styles.linkText}>Cadastre-se.</Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 };
@@ -44,8 +49,15 @@ const styles = StyleSheet.create({
   },
   footerText: {
     position: 'absolute',
+    flexDirection: 'row',
+    gap: 5,
     bottom: height * 0.055,
     color: '#333',
+  },
+  linkContainer:{
+    position: 'absolute',
+    bottom: height * 0.01,
+
   },
   linkText: {
     color: '#2E7D32',
