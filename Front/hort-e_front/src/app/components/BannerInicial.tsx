@@ -1,5 +1,6 @@
+import { MaterialCommunityIcons as Icon } from '@expo/vector-icons';
 import React from 'react';
-import { Text, StyleSheet, ImageBackground, Dimensions } from 'react-native';
+import { Dimensions, ImageBackground, StyleSheet, Text, View } from 'react-native';
 
 const { height, width } = Dimensions.get('window');
 
@@ -10,7 +11,10 @@ export default function BannerInicial() {
             style={styles.imageBackground}
             imageStyle={styles.image}
             >
-            <Text style={styles.logo}>(plantinha) Hort-E</Text>
+            <View style={styles.logoContainer}>
+                <Icon name="sprout-outline" size={50} color="#fff" />
+                <Text style={styles.logo}> Hort-E </Text>
+            </View>
             <Text style={styles.title}>
                 Sua solução{'\n'}
                 para{'\n'}
@@ -40,13 +44,18 @@ const styles = StyleSheet.create({
         boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
         resizeMode: 'cover',
     },
+    logoContainer: {
+        position: 'absolute',
+        top: height * 0.045,
+        left: width * 0.06,
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 5,
+    },
     logo: {
         fontSize: 42,
         fontWeight: 'black',
         color: '#fff',
-        position: 'absolute',
-        top: height * 0.045,
-        left: width * 0.06,
         elevation: 6,
     },
     title: {

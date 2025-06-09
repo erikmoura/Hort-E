@@ -1,3 +1,4 @@
+import { MaterialCommunityIcons as Icon } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import * as SecureStore from 'expo-secure-store';
 import React, { useState } from 'react';
@@ -46,7 +47,7 @@ export default function Login() {
 
   return (
     <View style={styles.container}>
-      <View style={styles.logo} />
+      <Icon name="leaf-circle-outline" size={190} style={styles.logo} color="#257D3C" />
       <View style={styles.buttonGoogle}>
         <BotaoGoogle onPress={() => {}} />
       </View>
@@ -81,7 +82,6 @@ const styles = StyleSheet.create({
     position: 'absolute',
     width: width * 0.5,
     height: height * 0.2,
-    backgroundColor: '#D9D9D9',
     top: height * 0.2,
     left: width * 0.25,
   },

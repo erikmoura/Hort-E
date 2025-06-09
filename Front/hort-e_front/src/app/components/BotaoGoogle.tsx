@@ -1,5 +1,6 @@
+import { Ionicons as Icon } from '@expo/vector-icons';
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Dimensions } from 'react-native';
+import { Dimensions, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 type propsBotao = {
   onPress: () => void;
@@ -12,7 +13,7 @@ export default function BotaoGoogle({onPress}: propsBotao) {
     <View style={styles.container}>
       <TouchableOpacity style={styles.button} onPress={onPress}>
         <View style={styles.viewBotao}>
-            <Text style={styles.buttonText}>(logo)</Text>
+            <Icon name="logo-google" size={24} color="#000000" />
             <Text style={styles.buttonText}>Continuar com o Google</Text>
         </View>
       </TouchableOpacity>
@@ -45,6 +46,7 @@ const styles = StyleSheet.create({
     color: '#000000',
     fontSize: 14,
     lineHeight: 20,
-    fontWeight: 'regular', 
+    fontWeight: 'regular',
+    marginTop: height * 0.003, 
   },
 });

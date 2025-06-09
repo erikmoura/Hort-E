@@ -1,3 +1,4 @@
+import { MaterialCommunityIcons as Icon } from '@expo/vector-icons';
 import * as Location from 'expo-location';
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
@@ -82,7 +83,7 @@ export default function Register() {
 
   return (
     <View style={styles.container}>
-      <View style={styles.logo} />
+      <Icon name="leaf-circle-outline" size={190} style={styles.logo} color="#257D3C" />
       <View style={styles.buttonEmail}>
         <BotaoInput
           label="Email"
@@ -129,7 +130,6 @@ const styles = StyleSheet.create({
     position: 'absolute',
     width: width * 0.5,
     height: height * 0.2,
-    backgroundColor: '#D9D9D9',
     top: height * 0.2,
     left: width * 0.25,
   },

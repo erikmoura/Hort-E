@@ -1,6 +1,6 @@
+import { Ionicons as Icon } from '@expo/vector-icons';
 import React from 'react';
 import { Dimensions, ImageBackground, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-
 
 const { height, width } = Dimensions.get('window');
 
@@ -19,6 +19,7 @@ export default function CardLista({title, onPress, image}: CardListaProps) {
                 imageStyle={styles.image}>
                 <View style={styles.mascara} /> 
                 <Text style={styles.title}>{title}</Text>
+                <Icon name="chevron-forward" size={34} color="#ffffff" style={styles.icone} />
             </ImageBackground>
         </TouchableOpacity>
     );
@@ -57,5 +58,10 @@ const styles = StyleSheet.create({
         color: '#ffffff',
         position: 'absolute',
         zIndex: 1,
-    }
+    },
+    icone:{
+        position: 'absolute',
+        right: width * 0.05,
+        top: height * 0.021,
+    },
 })
