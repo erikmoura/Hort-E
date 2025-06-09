@@ -2,6 +2,7 @@ package com.horte.controller;
 
 import com.horte.dto.ComentarioCreateRequest;
 import com.horte.dto.PostCreateRequest;
+import com.horte.dto.PostResponse;
 import com.horte.model.Comentario;
 import com.horte.model.Post;
 import com.horte.model.Usuario;
@@ -52,8 +53,8 @@ public class PostController {
     )
     @ApiResponse(responseCode = "200", description = "Lista de posts retornada com sucesso")
     @GetMapping
-    public ResponseEntity<List<Post>> getAllPosts() {
-        List<Post> posts = postService.listarTodosPosts();
+    public ResponseEntity<List<PostResponse>> getAllPosts() {
+        List<PostResponse> posts = postService.listarTodosPosts();
         return ResponseEntity.ok(posts);
     }
 

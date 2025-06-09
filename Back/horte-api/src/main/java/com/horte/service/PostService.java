@@ -2,9 +2,14 @@ package com.horte.service;
 
 import com.horte.model.Usuario;
 import com.horte.model.Post;
+import com.horte.model.Role;
+import com.horte.model.RoleName;
 
 import com.horte.repository.UsuarioRepository;
 import com.horte.repository.PostRepository;
+
+import com.horte.dto.PostResponse;
+import com.horte.dto.UsuarioResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
@@ -14,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class PostService {
@@ -23,8 +29,10 @@ public class PostService {
     @Autowired
     private UsuarioRepository usuarioRepository;
 
-    public List<Post> listarTodosPosts() {
-        return postRepository.findAll(Sort.by(Sort.Direction.DESC, "postData"));
+    public List<PostResponse> listarTodosPosts() {
+        return postRepository.findAll().stream()
+                .map(this::mapPostToPostResponse)
+                .collect(Collectors.toList());
     }
 
     public Optional<Post> buscarPostPorId(Long id) {
@@ -55,5 +63,26 @@ public class PostService {
             throw new IllegalArgumentException("Post não encontrado com ID: " + id);
         }
         postRepository.deleteById(id);
+    }
+
+    private PostResponse mapPostToPostResponse(Post post) {
+        PostResponse response = new PostResponse();
+        response.setId(post.getId());
+        UsuarioResponse dto = new UsuarioResponse();
+            dto.setId(post.getAutor().getId());
+            dto.setUsername(post.getAutor().getUsername());
+            dto.setUsuarioEmail(post.getAutor().getUsuarioEmail());
+            dto.setUsuarioImagemUrl(post.getAutor().getUsuarioImagemUrl());
+            dto.setLocalizacao(post.getAutor().getLocalizacao());
+            dto.setHortaTipo(post.getAutor().getHortaTipo());
+            dto.setRoles(post.getAutor().getRoles().stream()
+                                .map(role -> role.getName().name())
+                                .collect(Collectors.toSet())); 
+        response.setAutor(dto);
+        response.setPostTexto(post.getPostTexto());
+        response.setPostData(post.getPostData().toString());
+        response.setPostImagemUrl(post.getPostImagemUrl());
+        response.setComentarios(post.getComentarios());
+        return response;
     }
 }
