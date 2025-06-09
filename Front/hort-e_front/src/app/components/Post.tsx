@@ -112,7 +112,13 @@ export default function Post({ post }: PostProps) {
             >
                 <View style={styles.modalOverlay}>
                     <View style={styles.modalContainer}>
-                        <Text style={styles.modalTitle}>Comentários</Text>
+                        <View style={styles.modaltitleContainer}>
+                            <Text style={styles.modalTitle}>Comentários</Text>
+                            <TouchableOpacity onPress={() => setModalVisible(false)} style={styles.closeButton}>
+                                <Text style={styles.closeButtonText}>Fechar</Text>
+                            </TouchableOpacity>
+                        </View>
+                        
                         <ScrollView style={styles.commentList}>
                             {comentarios.length > 0 ? (
                                 comentarios.map((comentario) => (
@@ -136,10 +142,6 @@ export default function Post({ post }: PostProps) {
                             <Text style={styles.enviarButtonText}>Enviar</Text>
                         </TouchableOpacity>
                         </View>
-
-                        <TouchableOpacity onPress={() => setModalVisible(false)} style={styles.closeButton}>
-                        <Text style={styles.closeButtonText}>Fechar</Text>
-                        </TouchableOpacity>
                     </View>
                 </View>
             </Modal>
@@ -219,10 +221,14 @@ const styles = StyleSheet.create({
         borderTopRightRadius: 20,
         maxHeight: height * 0.9,
     },
+    modaltitleContainer:{
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+    },
     modalTitle: {
         fontSize: 18,
         fontWeight: 'bold',
-        marginBottom: 10,
+        marginBottom: width * 0.1,
     },
     commentList: {
         maxHeight: height * 0.9,
@@ -230,7 +236,7 @@ const styles = StyleSheet.create({
     comentario: {
         fontSize: 14,
         color: '#000',
-        marginBottom: 10,
+        marginBottom: height * 0.01,
     },
     semComentarios: {
         fontSize: 14,
@@ -238,11 +244,10 @@ const styles = StyleSheet.create({
         fontStyle: 'italic',
     },
     closeButton: {
-        alignSelf: 'center',
-        marginTop: 15,
+        marginBottom: width * 0.1,
         backgroundColor: '#2E8B57',
-        paddingVertical: 8,
-        paddingHorizontal: 20,
+        paddingVertical: height * 0.01,
+        paddingHorizontal: width * 0.05,
         borderRadius: 20,
     },
     closeButtonText: {
@@ -253,24 +258,25 @@ const styles = StyleSheet.create({
     inputContainer: {
         flexDirection: 'row',
         alignItems: 'center',
-        marginTop: 10,
+        marginTop: height * 0.02,
+        marginBottom: height * 0.02,
     },
     textInput: {
         flex: 1,
         borderColor: '#ccc',
         borderWidth: 1,
         borderRadius: 15,
-        paddingVertical: 6,
-        paddingHorizontal: 12,
+        paddingVertical: height * 0.01,
+        paddingHorizontal: width * 0.03,
         fontSize: 14,
         backgroundColor: '#f5f5f5',
     },
     enviarButton: {
-        marginLeft: 10,
+        marginLeft: width * 0.03,
         backgroundColor: '#2E8B57',
-        paddingHorizontal: 15,
-        paddingVertical: 8,
-        borderRadius: 15,
+        paddingVertical: height * 0.01,
+        paddingHorizontal: width * 0.05,
+        borderRadius: 20,
     },
     enviarButtonText: {
         color: '#fff',
