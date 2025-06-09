@@ -1,13 +1,56 @@
-import React from "react";
-import { View, StyleSheet, Dimensions, ScrollView } from "react-native";
-import { useRouter } from "expo-router";
-import InputPerfil from "../../components/InputPerfil";
+import * as SecureStore from 'expo-secure-store';
+import React, { useEffect, useState } from "react";
+import { Dimensions, ScrollView, StyleSheet, View } from "react-native";
 import BannerPerfil from "../../components/BannerPerfil";
 import FotoPerfil from "../../components/FotoPerfil";
+import InputPerfil from "../../components/InputPerfil";
+import { useAuth } from "../../hooks/useAuth";
 
 const { height, width } = Dimensions.get("window");
 
 export default function Profile() {
+
+    const { token } = useAuth();
+    const [userData, setUserData] = useState({
+        imagem: '',
+        nome: '',
+        cidade: '',
+        email: '',
+        tipoHorta: ''
+    });
+
+    useEffect(() => {
+        if (!token) return;
+        async function fetchUserData() {
+            try {
+                const userId = await SecureStore.getItemAsync('userId');
+                if (!userId) return;
+
+                const response = await fetch(`http://10.0.2.2:8080/api/usuarios/${userId}/profile/id`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json',
+                    },
+                });
+                const data = await response.json()
+
+                setUserData({
+                    imagem: data.usuarioImagemUrl || '',
+                    nome: data.username || '',
+                    cidade: data.localizacao || '',
+                    email: data.usuarioEmail || '',
+                    tipoHorta: data.hortaTipo || ''
+                });
+
+            } catch (error) {
+                console.error('Erro ao buscar dados do usuário:', error);
+            }
+        }
+
+        fetchUserData();
+    }, [token]);
+
 
     return (
         <View style={styles.container}>
@@ -15,33 +58,34 @@ export default function Profile() {
                 <BannerPerfil />
             </View>
             <View style = {styles.fotoEdit}>
-                <FotoPerfil />
+                {userData.imagem !== '' && (
+                    <FotoPerfil value={userData.imagem}/>
+                )}
             </View>
             <ScrollView style={styles.scrollview}>
                 <InputPerfil
-                titulo="Nome:"
-                label="Digite seu nome..."
-                onPress={() => {}}
+                    titulo="Nome de Usuário:"
+                    label="Digite seu nome..."
+                    value={userData.nome}
+                    onChangeText={(text) => setUserData((prev) => ({ ...prev, nome: text }))}
                 />
                 <InputPerfil
                     titulo="Cidade:"
                     label="Digite sua cidade..."
-                    onPress={() => {}}
+                    value={userData.cidade}
+                    onChangeText={(text) => setUserData((prev) => ({ ...prev, cidade: text }))}
                 />
                 <InputPerfil
                     titulo="Email:"
                     label="Digite seu email..."
-                    onPress={() => {}}
+                    value={userData.email}
+                    onChangeText={(text) => setUserData((prev) => ({ ...prev, email: text }))}
                 />
                 <InputPerfil
-                    titulo="Logradouro:"
-                    label="Digite seu logradouro..."
-                    onPress={() => {}}
-                />
-                <InputPerfil
-                    titulo="Interesses:"
-                    label="Digite seus interesses..."
-                    onPress={() => {}}
+                    titulo="Tipo de Horta:"
+                    label="Digite o tipo de horta..."
+                    value={userData.tipoHorta}
+                    onChangeText={(text) => setUserData((prev) => ({ ...prev, tipoHorta: text }))}
                 />
                 <View style={styles.blocoInvisivel}/>
             </ScrollView>

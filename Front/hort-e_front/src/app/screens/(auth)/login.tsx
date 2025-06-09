@@ -1,16 +1,48 @@
-import React from 'react';
-import { View, StyleSheet, Dimensions } from 'react-native';
 import { useRouter } from 'expo-router';
-import BotaoInput from '../../components/BotaoInput';
+import * as SecureStore from 'expo-secure-store';
+import React, { useState } from 'react';
+import { Alert, Dimensions, StyleSheet, View } from 'react-native';
 import BotaoGoogle from '../../components/BotaoGoogle';
+import BotaoInput from '../../components/BotaoInput';
 import BotaoVerde from '../../components/BotaoVerde';
 
-// Pegando as dimensões da tela
 const { height, width } = Dimensions.get('window');
 
 export default function Login() {
-
   const router = useRouter();
+
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+
+  const handleLogin = async () => {
+    try {
+      const response = await fetch('http://10.0.2.2:8080/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ username, password }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Erro ao fazer login');
+      }
+
+      const data = await response.json();
+      const token = data.token;
+      const id = data.id;
+
+      // Armazenar o token no AsyncStorage
+      await SecureStore.setItemAsync('authToken', token);
+      await SecureStore.setItemAsync('userId', id.toString());
+
+      // Navegar para próxima tela
+      router.push('../(tabs)/guides/allguides');
+    } catch (error: any) {
+      Alert.alert('Erro de login', error.message);
+    }
+  };
 
   return (
     <View style={styles.container}>
@@ -19,13 +51,22 @@ export default function Login() {
         <BotaoGoogle onPress={() => {}} />
       </View>
       <View style={styles.buttonEmail}>
-        <BotaoInput label="Email" onPress={() => {}} />
+        <BotaoInput
+          label="Nome de Usuário"
+          value={username}
+          onChangeText={setUsername}
+        />
       </View>
       <View style={styles.buttonPassword}>
-        <BotaoInput label="Senha" onPress={() => {}} />
+        <BotaoInput
+          label="Senha"
+          value={password}
+          onChangeText={setPassword}
+          secureTextEntry
+        />
       </View>
       <View style={styles.buttonEntrar}>
-        <BotaoVerde label="Entrar" onPress={() => router.push('../(tabs)/guides/allguides')} />
+        <BotaoVerde label="Entrar" onPress={handleLogin} />
       </View>
     </View>
   );
@@ -38,30 +79,30 @@ const styles = StyleSheet.create({
   },
   logo: {
     position: 'absolute',
-    width: width * 0.5, // 50% da largura da tela
-    height: height * 0.2, // 20% da altura da tela
+    width: width * 0.5,
+    height: height * 0.2,
     backgroundColor: '#D9D9D9',
-    top: height * 0.2, 
+    top: height * 0.2,
     left: width * 0.25,
   },
-  buttonGoogle:{
+  buttonGoogle: {
     position: 'absolute',
-    top: height * 0.44, 
-    left: width * 0.05, 
+    top: height * 0.44,
+    left: width * 0.05,
   },
   buttonEmail: {
     position: 'absolute',
-    top: height * 0.55, 
+    top: height * 0.55,
     left: width * 0.05,
   },
   buttonPassword: {
     position: 'absolute',
-    top: height * 0.64, 
+    top: height * 0.64,
     left: width * 0.05,
   },
   buttonEntrar: {
     position: 'absolute',
-    top: height * 0.74, 
+    top: height * 0.74,
     left: width * 0.05,
-  }
+  },
 });

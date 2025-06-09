@@ -16,6 +16,7 @@ public class UsuarioProfileResponse {
     private String usuarioImagemUrl;
     private String localizacao;
     private Integer hortaTipo;
+    private String usuarioEmail;
 
     public static UsuarioProfileResponse fromEntity(Usuario usuario) {
         UsuarioProfileResponse dto = new UsuarioProfileResponse();
@@ -23,6 +24,7 @@ public class UsuarioProfileResponse {
         dto.setUsuarioImagemUrl(usuario.getUsuarioImagemUrl());
         dto.setLocalizacao(usuario.getLocalizacao());
         dto.setHortaTipo(usuario.getHortaTipo());
+        dto.setUsuarioEmail(usuario.getUsuarioEmail());
         return dto;
     }
 }

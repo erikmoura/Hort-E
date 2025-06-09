@@ -1,16 +1,30 @@
 import React from 'react';
-import { View, Text, StyleSheet, Dimensions} from 'react-native';
-import BotaoInput from '../components/BotaoInput'
+import { Dimensions, StyleSheet, Text, View } from 'react-native';
+import BotaoInput from '../components/BotaoInput';
 
 const { height, width } = Dimensions.get('window');
 
 type propsInputPerfil = {
     titulo: string;
     label: string;
-    onPress: () => void;
+    value: string;
+    onChangeText: (text: string) => void;
 }
 
-export default function InputPerfil({titulo, label, onPress}: propsInputPerfil) {
+export default function InputPerfil({titulo, label, value, onChangeText}: propsInputPerfil) {
+    
+    let displayValue = value;
+
+    if (value.toString() === '0') {
+        displayValue = 'Interior';
+    } else if (value.toString() === '1') {
+        displayValue = 'Exterior';
+    } else if (value.toString() === '2') {
+        displayValue = 'Interior e Exterior';
+    } else {
+        displayValue = value;
+    }
+    
     return (
         <View style={styles.container}>
             <View style={styles.tipoInput}>
@@ -19,7 +33,8 @@ export default function InputPerfil({titulo, label, onPress}: propsInputPerfil) 
             <View style = {styles.botaoinput}>
                 <BotaoInput
                     label={label}
-                    onPress={() => {}}
+                    value={displayValue}
+                    onChangeText={onChangeText}
                 />
             </View>
         </View>

@@ -1,82 +1,97 @@
-import React from "react";
-import { View, StyleSheet, Dimensions, ScrollView } from "react-native";
+import { useFocusEffect } from "@react-navigation/native";
 import { useRouter } from "expo-router";
+import React, { useCallback, useEffect, useState } from 'react';
+import { Alert, Dimensions, ScrollView, StyleSheet, View } from "react-native";
 import CardLista from "../../../components/CardLista";
-import BotaoInput from "../../../components/BotaoInput";
+import PesquisaPlantas from "../../../components/PesquisaPlantas";
+import { useAuth } from '../../../hooks/useAuth';
 
 const { height, width } = Dimensions.get("window");
 
 export default function PlantList() {
 
+    const router = useRouter();
+    const { token } = useAuth();
+    
+    const [plantas, setPlantas] = useState([]);
+    const [plantasFiltradas, setPlantasFiltradas] = useState([]);
+    const [textoPesquisa, setTextoPesquisa] = useState('');
+    
+    useFocusEffect(
+        useCallback(() => {
+            if (!token) return;
+    
+            const fetchPlantas = async () => {
+                try {
+                    const response = await fetch('http://10.0.2.2:8080/api/plantas', {
+                        method: 'GET',
+                        headers: {
+                            'Authorization': `Bearer ${token}`,
+                            'Content-Type': 'application/json',
+                        },
+                    });
+    
+                    if (!response.ok) {
+                        throw new Error('Erro ao buscar plantas');
+                    }
+    
+                    const data = await response.json();
+                    setPlantas(data);
+                    setPlantasFiltradas(data);
+                } catch (error) {
+                    console.error(error);
+                    Alert.alert('Erro', 'Não foi possível carregar as plantas.');
+                }
+            };
+    
+            fetchPlantas();
+        }, [token]) // dispara novamente se o token mudar
+    );
+
+    useEffect(() => {
+        const texto = textoPesquisa.toLowerCase();
+        const filtradas = plantas.filter((planta) =>
+            (planta.nomeComum ?? '').toLowerCase().includes(texto)
+        );
+        setPlantasFiltradas(filtradas);
+    }, [textoPesquisa, plantas]);
+
     return (
         <View style={styles.container}>
             <View style = {styles.botaoinput}>
-                <BotaoInput
+                <PesquisaPlantas
                     label="Pesquisar..."
-                    onPress={() => {}}
+                    value={textoPesquisa}
+                    onChangeText={setTextoPesquisa}
                 />
             </View>
             <ScrollView style={styles.scrollview}>
-                <CardLista
-                    title="Manjericão"
-                    onPress={() => {}}
-                    image="https://s2.glbimg.com/XsEfbtMEWzj4dv-twPko6BAmS0M=/512x320/smart/e.glbimg.com/og/ed/f/original/2017/04/07/thinkstockphotos-92693911.jpg"
-                />
-                <CardLista
-                    title="Manjericão"
-                    onPress={() => {}}
-                    image="https://s2.glbimg.com/XsEfbtMEWzj4dv-twPko6BAmS0M=/512x320/smart/e.glbimg.com/og/ed/f/original/2017/04/07/thinkstockphotos-92693911.jpg"
-                />
-                <CardLista
-                    title="Manjericão"
-                    onPress={() => {}}
-                    image="https://s2.glbimg.com/XsEfbtMEWzj4dv-twPko6BAmS0M=/512x320/smart/e.glbimg.com/og/ed/f/original/2017/04/07/thinkstockphotos-92693911.jpg"
-                />
-                <CardLista
-                    title="Manjericão"
-                    onPress={() => {}}
-                    image="https://s2.glbimg.com/XsEfbtMEWzj4dv-twPko6BAmS0M=/512x320/smart/e.glbimg.com/og/ed/f/original/2017/04/07/thinkstockphotos-92693911.jpg"
-                />
-                <CardLista
-                    title="Manjericão"
-                    onPress={() => {}}
-                    image="https://s2.glbimg.com/XsEfbtMEWzj4dv-twPko6BAmS0M=/512x320/smart/e.glbimg.com/og/ed/f/original/2017/04/07/thinkstockphotos-92693911.jpg"
-                />
-                <CardLista
-                    title="Manjericão"
-                    onPress={() => {}}
-                    image="https://s2.glbimg.com/XsEfbtMEWzj4dv-twPko6BAmS0M=/512x320/smart/e.glbimg.com/og/ed/f/original/2017/04/07/thinkstockphotos-92693911.jpg"
-                />
-                <CardLista
-                    title="Manjericão"
-                    onPress={() => {}}
-                    image="https://s2.glbimg.com/XsEfbtMEWzj4dv-twPko6BAmS0M=/512x320/smart/e.glbimg.com/og/ed/f/original/2017/04/07/thinkstockphotos-92693911.jpg"
-                />
-                <CardLista
-                    title="Manjericão"
-                    onPress={() => {}}
-                    image="https://s2.glbimg.com/XsEfbtMEWzj4dv-twPko6BAmS0M=/512x320/smart/e.glbimg.com/og/ed/f/original/2017/04/07/thinkstockphotos-92693911.jpg"
-                />
-                <CardLista
-                    title="Manjericão"
-                    onPress={() => {}}
-                    image="https://s2.glbimg.com/XsEfbtMEWzj4dv-twPko6BAmS0M=/512x320/smart/e.glbimg.com/og/ed/f/original/2017/04/07/thinkstockphotos-92693911.jpg"
-                />
-                <CardLista
-                    title="Manjericão"
-                    onPress={() => {}}
-                    image="https://s2.glbimg.com/XsEfbtMEWzj4dv-twPko6BAmS0M=/512x320/smart/e.glbimg.com/og/ed/f/original/2017/04/07/thinkstockphotos-92693911.jpg"
-                />
-                <CardLista
-                    title="Manjericão"
-                    onPress={() => {}}
-                    image="https://s2.glbimg.com/XsEfbtMEWzj4dv-twPko6BAmS0M=/512x320/smart/e.glbimg.com/og/ed/f/original/2017/04/07/thinkstockphotos-92693911.jpg"
-                />
-                <CardLista
-                    title="Manjericão"
-                    onPress={() => {}}
-                    image="https://s2.glbimg.com/XsEfbtMEWzj4dv-twPko6BAmS0M=/512x320/smart/e.glbimg.com/og/ed/f/original/2017/04/07/thinkstockphotos-92693911.jpg"
-                />
+                {plantasFiltradas.map((planta) => (
+                    <CardLista
+                        key={planta.id}
+                        title={planta.nomeComum}
+                        image={planta.plantaImagemUrl}
+                        onPress={() => 
+                            router.push({
+                                pathname: '/screens/(isolated)/plantinfo',
+                                params: {
+                                    id: planta.id,
+                                    nome: planta.nomeComum,
+                                    nomeCien: planta.nomeCientifico,
+                                    categoria: planta.categoria,
+                                    image: planta.plantaImagemUrl,
+                                    descricao: planta.descricao,
+                                    tipoSolo: planta.tipoSolo,
+                                    irrigacao: planta.irrigacao,
+                                    localPlantio: planta.localPlantio,
+                                    clima: planta.clima,
+                                    luzSolar: planta.luzSolar,
+                                    guias: planta.guiasAssociadosIds,
+                                },
+                            })
+                        }
+                    />
+                ))}
                 <View style={styles.blocoInvisivel}/>
             </ScrollView>
         </View>

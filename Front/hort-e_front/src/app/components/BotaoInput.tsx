@@ -1,18 +1,31 @@
 import React from 'react';
 import { View, StyleSheet, TextInput, Dimensions } from 'react-native';
 
-type propsBotao = {
+type PropsBotaoInput = {
   label: string;
-  onPress: () => void;
-}
+  value: string;
+  onChangeText: (text: string) => void;
+  secureTextEntry?: boolean;
+};
 
 const { height, width } = Dimensions.get('window');
 
-export default function BotaoInput({label, onPress}: propsBotao) {
+export default function BotaoInput({
+  label,
+  value,
+  onChangeText,
+  secureTextEntry = false,
+}: PropsBotaoInput) {
   return (
     <View style={styles.container}>
-      <TextInput style={styles.button} placeholder = {label} onPress={onPress} placeholderTextColor="#828282">
-      </TextInput>
+      <TextInput
+        style={styles.input}
+        placeholder={label}
+        placeholderTextColor="#828282"
+        value={value}
+        onChangeText={onChangeText}
+        secureTextEntry={secureTextEntry}
+      />
     </View>
   );
 }
@@ -21,25 +34,16 @@ const styles = StyleSheet.create({
   container: {
     justifyContent: 'center',
     alignItems: 'center',
-    width:'100%',
+    width: '100%',
   },
-  button : {
+  input: {
     backgroundColor: '#ffffff',
-    borderColor: '#D9D9D9', 
+    borderColor: '#D9D9D9',
     borderWidth: 1,
-    borderStyle: 'solid',
     borderRadius: 10,
     width: width * 0.9,
     height: height * 0.07,
-    justifyContent: 'center',
-    boxShadow: '1px 1px 6px rgba(0, 0, 0, 0.1)',
     paddingLeft: 15,
-    },
-  buttonText: {
-    color: '#828282',
-    fontSize: 16,
-    fontWeight: 'regular',
-    marginLeft: 15, 
+    color: '#000000',
   },
 });
-

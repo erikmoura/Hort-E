@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, Dimensions} from 'react-native';
+import { Dimensions, StyleSheet, Text, View } from 'react-native';
 
 
 const { height, width } = Dimensions.get('window');
@@ -27,7 +27,7 @@ const styles = StyleSheet.create({
         backgroundColor: '#257D3C',
         width: '100%',
         height: height * 0.12,
-        paddingTop: height * 0.01,
+        paddingTop: height * 0.025,
     },
     title: {
         fontSize: 40,

@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, Dimensions, TouchableOpacity, Image } from 'react-native';
+import { Dimensions, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 const { height, width } = Dimensions.get('window');
 
@@ -11,15 +11,26 @@ type propsCardGuia = {
 }
 
 export default function CardGuia({title, ideais, image, onPress}: propsCardGuia) {
+    
+    let displayValue = ideais;
+
+    if (ideais.toString() === '0') {
+        displayValue = 'Interior';
+    } else if (ideais.toString() === '1') {
+        displayValue = 'Exterior';
+    } else if (ideais.toString() === '2') {
+        displayValue = 'Interior e Exterior';
+    }
+    
     return (
         <TouchableOpacity style={styles.container} onPress={onPress}>
             <View style={styles.divTextos}>
-                <Text style={styles.text}>{ideais}</Text>
+                <Text style={styles.text}>Ideal para: {displayValue}</Text>
                 <Text style={styles.text}>{title}</Text>
             </View>
             <View style={styles.imagemContainer}> 
                 <Image
-                    source={require('../assets/images/manjericao.png')}
+                    source={{ uri: image }}
                     style={styles.image}
                 />
             </View>
@@ -34,6 +45,8 @@ const styles = StyleSheet.create({
         backgroundColor: '#FFFFFF',
         borderRadius: 12,
         marginBottom: height * 0.02,
+        overflow: 'hidden',
+        boxShadow: '0px 6px 6px rgba(0, 0, 0, 0.1)',
     },
     divTextos: {
         display: 'flex',
@@ -50,7 +63,7 @@ const styles = StyleSheet.create({
     image: {
         width: '100%',
         height: '100%',
-        resizeMode: 'stretch',
+        resizeMode: 'cover',
     },
     text: {
         fontSize: 20,

@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, Dimensions, ImageBackground, TouchableOpacity } from 'react-native';
+import { Dimensions, ImageBackground, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 
 const { height, width } = Dimensions.get('window');
@@ -12,9 +12,9 @@ type CardListaProps = {
 
 export default function CardLista({title, onPress, image}: CardListaProps) {
     return (
-        <TouchableOpacity style={styles.container}>
+        <TouchableOpacity style={styles.container} onPress = {onPress}>
             <ImageBackground 
-                source={require('../assets/images/manjericao.png')} 
+                source={{ uri: image }}
                 style={styles.imagemContainer}
                 imageStyle={styles.image}>
                 <View style={styles.mascara} /> 
@@ -34,6 +34,7 @@ const styles = StyleSheet.create({
         borderRadius: 12,
         overflow: 'hidden',
         marginBottom: height * 0.015,
+        boxShadow: '0px 6px 6px rgba(0, 0, 0, 0.1)',
     },
     imagemContainer: {
         width: '100%',
