@@ -2,6 +2,7 @@ package com.horte.controller;
 
 import com.horte.dto.UsuarioProfileResponse;
 import com.horte.dto.UsuarioResponse;
+import com.horte.dto.UsuarioUpdateRequest;
 import com.horte.service.UsuarioService;
 
 import org.springframework.http.HttpStatus;
@@ -10,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import jakarta.validation.Valid;
 
 import java.util.List;
 
@@ -61,6 +63,35 @@ public class UsuarioController {
             .orElse(ResponseEntity.notFound().build());
     }
 
+    // Endoint para atualizar perfil do próprio usuário
+    @Operation(
+        summary = "Atualizar perfil do usuário autenticado",
+        description = "Atualiza as informações de perfil do usuário atualmente autenticado. O ID na URL deve corresponder ao ID do usuário autenticado ou a requisição deve ser feita por um ADMIN. Campos não fornecidos não serão alterados.",
+        security = @SecurityRequirement(name = "bearerAuth")
+    )
+    @ApiResponse(responseCode = "200", description = "Perfil do usuário atualizado com sucesso",
+                 content = @Content(schema = @Schema(implementation = UsuarioResponse.class)))
+    @ApiResponse(responseCode = "400", description = "Requisição inválida (dados mal formatados ou unicidade violada)")
+    @ApiResponse(responseCode = "401", description = "Não autenticado")
+    @ApiResponse(responseCode = "403", description = "Não autorizado (tentando atualizar perfil de outro usuário sem ser ADMIN)")
+    @ApiResponse(responseCode = "404", description = "Usuário não encontrado")
+
+    @PreAuthorize("hasRole('ADMIN') or #id == authentication.principal.id")
+    @PutMapping("/{id}")
+    public ResponseEntity<UsuarioResponse> updateUsuario(
+            @PathVariable Long id,
+            @Valid @RequestBody UsuarioUpdateRequest request) {
+        
+        try {
+            UsuarioResponse updatedUser = usuarioService.atualizarUsuario(id, request);
+            return ResponseEntity.ok(updatedUser);
+        } catch (IllegalArgumentException e) {
+            if (e.getMessage().contains("não encontrado")) {
+                return ResponseEntity.notFound().build();
+            }
+            return ResponseEntity.badRequest().body(new UsuarioResponse(null, null, null, null, null, e.getMessage(), null, null));
+        }
+    }
 
     // Endpoints de Administração
 
