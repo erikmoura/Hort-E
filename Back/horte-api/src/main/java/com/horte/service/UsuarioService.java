@@ -7,6 +7,7 @@ import com.horte.repository.RoleRepository;
 import com.horte.repository.UsuarioRepository;
 import com.horte.dto.UsuarioProfileResponse;
 import com.horte.dto.UsuarioResponse;
+import com.horte.dto.UsuarioUpdateRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -95,14 +96,36 @@ public class UsuarioService {
     }
 
     @Transactional
-    public Usuario atualizarUsuario(Long id, Usuario usuarioAtualizado) {
+    public UsuarioResponse atualizarUsuario(Long id, UsuarioUpdateRequest usuarioAtualizadoDto) {
         return usuarioRepository.findById(id).map(usuarioExistente -> {
-            usuarioExistente.setUsername(usuarioAtualizado.getUsername());
-            usuarioExistente.setUsuarioEmail(usuarioAtualizado.getUsuarioEmail());
-            usuarioExistente.setUsuarioImagemUrl(usuarioAtualizado.getUsuarioImagemUrl());
-            usuarioExistente.setLocalizacao(usuarioAtualizado.getLocalizacao());
-            usuarioExistente.setHortaTipo(usuarioAtualizado.getHortaTipo());
-            return usuarioRepository.save(usuarioExistente);
+            if (usuarioAtualizadoDto.getUsername() != null && !usuarioAtualizadoDto.getUsername().isBlank()) {
+                if (usuarioRepository.findByUsername(usuarioAtualizadoDto.getUsername())
+                                     .filter(u -> !u.getId().equals(id))
+                                     .isPresent()) {
+                    throw new IllegalArgumentException("Nome de usuário já está em uso por outro usuário.");
+                }
+                usuarioExistente.setUsername(usuarioAtualizadoDto.getUsername());
+            }
+            if (usuarioAtualizadoDto.getUsuarioEmail() != null && !usuarioAtualizadoDto.getUsuarioEmail().isBlank()) {
+                if (usuarioRepository.findByUsuarioEmail(usuarioAtualizadoDto.getUsuarioEmail())
+                                     .filter(u -> !u.getId().equals(id))
+                                     .isPresent()) {
+                    throw new IllegalArgumentException("E-mail já está em uso por outro usuário.");
+                }
+                usuarioExistente.setUsuarioEmail(usuarioAtualizadoDto.getUsuarioEmail());
+            }
+            if (usuarioAtualizadoDto.getUsuarioImagemUrl() != null) {
+                usuarioExistente.setUsuarioImagemUrl(usuarioAtualizadoDto.getUsuarioImagemUrl());
+            }
+            if (usuarioAtualizadoDto.getLocalizacao() != null) {
+                usuarioExistente.setLocalizacao(usuarioAtualizadoDto.getLocalizacao());
+            }
+            if (usuarioAtualizadoDto.getHortaTipo() != null) {
+                usuarioExistente.setHortaTipo(usuarioAtualizadoDto.getHortaTipo());
+            }
+            
+            Usuario usuarioSalvo = usuarioRepository.save(usuarioExistente);
+            return mapUsuarioToUsuarioResponse(usuarioSalvo);
         }).orElseThrow(() -> new IllegalArgumentException("Usuário não encontrado com ID: " + id));
     }
 
@@ -114,7 +137,6 @@ public class UsuarioService {
         usuarioRepository.deleteById(id);
     }
 
-    // Método auxiliar para mapear Usuario para UsuarioResponse
     private UsuarioResponse mapUsuarioToUsuarioResponse(Usuario usuario) {
         UsuarioResponse dto = new UsuarioResponse();
         dto.setId(usuario.getId());
@@ -124,8 +146,8 @@ public class UsuarioService {
         dto.setLocalizacao(usuario.getLocalizacao());
         dto.setHortaTipo(usuario.getHortaTipo());
         dto.setRoles(usuario.getRoles().stream()
-                            .map(role -> role.getName().name())
-                            .collect(Collectors.toSet())); 
+                                .map(role -> role.getName().name())
+                                .collect(Collectors.toSet())); 
         return dto;
     }
 }
