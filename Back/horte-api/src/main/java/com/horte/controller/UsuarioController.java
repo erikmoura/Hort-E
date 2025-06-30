@@ -3,6 +3,7 @@ package com.horte.controller;
 import com.horte.dto.UsuarioProfileResponse;
 import com.horte.dto.UsuarioResponse;
 import com.horte.service.UsuarioService;
+import com.horte.model.Usuario;
 
 import org.springframework.http.HttpStatus;
 
@@ -18,6 +19,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
@@ -101,6 +103,41 @@ public class UsuarioController {
             return ResponseEntity.notFound().build();
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    @Operation(
+        summary = "Atualizar dados do usuário",
+        description = "Atualiza informações de perfil de um usuário (username, email, imagem). " +
+                      "A senha e as roles (funções) não são modificadas por este endpoint. " +
+                      "Requer autenticação como o próprio usuário ou como ADMIN.",
+        parameters = {
+            @Parameter(name = "id", description = "ID do usuário a ser atualizado", required = true, example = "1")
+        },
+        requestBody = @RequestBody(
+            description = "Objeto JSON com os dados do usuário a serem atualizados.",
+            required = true,
+            content = @Content(schema = @Schema(implementation = Usuario.class))
+        ),
+        security = @SecurityRequirement(name = "bearerAuth")
+    )
+    @ApiResponse(responseCode = "200", description = "Usuário atualizado com sucesso",
+                 content = @Content(mediaType = "application/json", schema = @Schema(implementation = UsuarioResponse.class)))
+    @ApiResponse(responseCode = "400", description = "Dados de entrada inválidos")
+    @ApiResponse(responseCode = "401", description = "Não autenticado")
+    @ApiResponse(responseCode = "403", description = "Não autorizado (tentando atualizar outro usuário sem ser ADMIN)")
+    @ApiResponse(responseCode = "404", description = "Usuário não encontrado")
+    @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN') or #id == principal.id")
+    public ResponseEntity<UsuarioResponse> atualizarUsuario(
+            @PathVariable Long id,
+            @org.springframework.web.bind.annotation.RequestBody Usuario usuarioAtualizado) {
+        
+        try {
+            UsuarioResponse usuarioSalvo = usuarioService.atualizarUsuario(id, usuarioAtualizado);
+            return ResponseEntity.ok(usuarioSalvo);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.notFound().build();
         }
     }
 }

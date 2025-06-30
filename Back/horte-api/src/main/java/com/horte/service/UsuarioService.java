@@ -95,16 +95,20 @@ public class UsuarioService {
     }
 
     @Transactional
-    public Usuario atualizarUsuario(Long id, Usuario usuarioAtualizado) {
-        return usuarioRepository.findById(id).map(usuarioExistente -> {
+        public UsuarioResponse atualizarUsuario(Long id, Usuario usuarioAtualizado) {
+            Usuario usuarioExistente = usuarioRepository.findById(id)
+                    .orElseThrow(() -> new IllegalArgumentException("Usuário não encontrado com ID: " + id));
+
             usuarioExistente.setUsername(usuarioAtualizado.getUsername());
             usuarioExistente.setUsuarioEmail(usuarioAtualizado.getUsuarioEmail());
             usuarioExistente.setUsuarioImagemUrl(usuarioAtualizado.getUsuarioImagemUrl());
             usuarioExistente.setLocalizacao(usuarioAtualizado.getLocalizacao());
             usuarioExistente.setHortaTipo(usuarioAtualizado.getHortaTipo());
-            return usuarioRepository.save(usuarioExistente);
-        }).orElseThrow(() -> new IllegalArgumentException("Usuário não encontrado com ID: " + id));
-    }
+            
+            Usuario usuarioSalvo = usuarioRepository.save(usuarioExistente);
+
+            return mapUsuarioToUsuarioResponse(usuarioSalvo);
+        }
 
     @Transactional
     public void deletarUsuario(Long id) {
