@@ -7,6 +7,7 @@ type PropsBotaoInput = {
   onChangeText: (text: string) => void;
   secureTextEntry?: boolean;
   onPress?: () => void;
+  editable?: boolean;
 };
 
 const { height, width } = Dimensions.get('window');
@@ -16,7 +17,8 @@ export default function BotaoInput({
   value,
   onChangeText,
   secureTextEntry = false,
-  onPress
+  onPress,
+  editable,
 }: PropsBotaoInput) {
   return (
     <View style={styles.container}>
@@ -28,6 +30,7 @@ export default function BotaoInput({
         onChangeText={onChangeText}
         secureTextEntry={secureTextEntry}
         onPress={onPress}
+        editable={editable}
       />
     </View>
   );

@@ -2,6 +2,7 @@ import { Ionicons as Icon } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React from 'react';
 import { Dimensions, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import CampoGuiaAssoc from '../../components/CampoGuiaAssoc';
 import CampoPlanta from "../../components/CampoPlanta";
 
 const { height, width } = Dimensions.get("window");
@@ -27,6 +28,10 @@ export default function PlantInfo() {
                         style={styles.image}
                     />
                 </View>
+                <CampoGuiaAssoc
+                    titulo="Guias associados:"
+                    conteudo={guias ? guias : 'Nenhum guia associado.'}
+                />
                 <CampoPlanta
                     titulo="Nome científico:"
                     conteudo={nomeCien}

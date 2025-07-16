@@ -9,9 +9,10 @@ type propsInputPerfil = {
     label: string;
     value: string;
     onChangeText: (text: string) => void;
+    editable?: boolean;
 }
 
-export default function InputPerfil({titulo, label, value, onChangeText}: propsInputPerfil) {
+export default function InputPerfil({titulo, label, value, onChangeText, editable}: propsInputPerfil) {
     
     let displayValue = value;
 
@@ -35,6 +36,7 @@ export default function InputPerfil({titulo, label, value, onChangeText}: propsI
                     label={label}
                     value={displayValue}
                     onChangeText={onChangeText}
+                    editable={editable}
                 />
             </View>
         </View>

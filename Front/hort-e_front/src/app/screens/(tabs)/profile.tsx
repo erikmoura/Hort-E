@@ -2,6 +2,7 @@ import * as SecureStore from 'expo-secure-store';
 import React, { useEffect, useState } from "react";
 import { Dimensions, ScrollView, StyleSheet, View } from "react-native";
 import BannerPerfil from "../../components/BannerPerfil";
+import BotaoVerde from '../../components/BotaoVerde';
 import FotoPerfil from "../../components/FotoPerfil";
 import InputPerfil from "../../components/InputPerfil";
 import { useAuth } from "../../hooks/useAuth";
@@ -12,6 +13,14 @@ export default function Profile() {
 
     const { token } = useAuth();
     const [userData, setUserData] = useState({
+        imagem: '',
+        nome: '',
+        cidade: '',
+        email: '',
+        tipoHorta: ''
+    });
+
+    const [originalUserData, setOriginalUserData] = useState({
         imagem: '',
         nome: '',
         cidade: '',
@@ -43,6 +52,14 @@ export default function Profile() {
                     tipoHorta: data.hortaTipo || ''
                 });
 
+                setOriginalUserData({
+                    imagem: data.usuarioImagemUrl || '',
+                    nome: data.username || '',
+                    cidade: data.localizacao || '',
+                    email: data.usuarioEmail || '',
+                    tipoHorta: data.hortaTipo || ''
+                });
+
             } catch (error) {
                 console.error('Erro ao buscar dados do usuário:', error);
             }
@@ -50,6 +67,97 @@ export default function Profile() {
 
         fetchUserData();
     }, [token]);
+
+    async function refetchUserData() {
+        try {
+            const userId = await SecureStore.getItemAsync('userId');
+            if (!userId) return;
+
+            const response = await fetch(`http://10.0.2.2:8080/api/usuarios/${userId}/profile/id`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json',
+                },
+            });
+            const data = await response.json()
+
+            setUserData({
+                imagem: data.usuarioImagemUrl || '',
+                nome: data.username || '',
+                cidade: data.localizacao || '',
+                email: data.usuarioEmail || '',
+                tipoHorta: data.hortaTipo || ''
+            });
+
+            setOriginalUserData({
+                imagem: data.usuarioImagemUrl || '',
+                nome: data.username || '',
+                cidade: data.localizacao || '',
+                email: data.usuarioEmail || '',
+                tipoHorta: data.hortaTipo || ''
+            });
+
+        } catch (error) {
+                console.error('Erro ao buscar dados do usuário:', error);
+        }
+    }
+
+
+    async function handleUpdateProfile() {
+        try {
+            const userId = await SecureStore.getItemAsync('userId');
+            if (!userId) return;
+
+            if (userData.tipoHorta === 'Interior') {
+                userData.tipoHorta = '0';
+            } 
+            else if (userData.tipoHorta === 'Exterior') {
+                userData.tipoHorta = '1';
+            } 
+            else if (userData.tipoHorta === 'Interior e Exterior') {
+                userData.tipoHorta = '2';
+            }
+
+            const response = await fetch(`http://10.0.2.2:8080/api/usuarios/${userId}`, {
+                method: 'PUT',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    username: userData.nome,
+                    localizacao: userData.cidade,
+                    usuarioEmail: userData.email,
+                    hortaTipo: userData.tipoHorta,
+                    usuarioImagemUrl: userData.imagem,
+                }),
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                console.error('Erro ao atualizar perfil:', errorData);
+                return;
+            }
+
+            console.log('Perfil atualizado com sucesso!');
+            refetchUserData();
+             
+        } catch (error) {
+            console.error('Erro ao enviar atualização:', error);
+        }
+    }
+
+    function hasChanges() {
+        if (!originalUserData) return false;
+        return (
+            userData.imagem !== originalUserData.imagem ||
+            userData.nome !== originalUserData.nome ||
+            userData.cidade !== originalUserData.cidade ||
+            userData.email !== originalUserData.email ||
+            userData.tipoHorta !== originalUserData.tipoHorta
+        );
+    }
 
 
     return (
@@ -68,25 +176,35 @@ export default function Profile() {
                     label="Digite seu nome..."
                     value={userData.nome}
                     onChangeText={(text) => setUserData((prev) => ({ ...prev, nome: text }))}
+                    editable={false}
                 />
                 <InputPerfil
                     titulo="Cidade:"
                     label="Digite sua cidade..."
                     value={userData.cidade}
                     onChangeText={(text) => setUserData((prev) => ({ ...prev, cidade: text }))}
+                    editable={true}
                 />
                 <InputPerfil
                     titulo="Email:"
                     label="Digite seu email..."
                     value={userData.email}
                     onChangeText={(text) => setUserData((prev) => ({ ...prev, email: text }))}
+                    editable={true}
                 />
                 <InputPerfil
                     titulo="Tipo de Horta:"
                     label="Digite o tipo de horta..."
                     value={userData.tipoHorta}
                     onChangeText={(text) => setUserData((prev) => ({ ...prev, tipoHorta: text }))}
+                    editable={true}
                 />
+                {hasChanges() && (
+                    <BotaoVerde
+                        label="Atualizar Perfil"
+                        onPress={handleUpdateProfile}
+                    />
+                )}
                 <View style={styles.blocoInvisivel}/>
             </ScrollView>
         </View>
