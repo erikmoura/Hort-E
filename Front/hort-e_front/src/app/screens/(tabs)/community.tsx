@@ -1,6 +1,7 @@
+import { Ionicons as Icon } from '@expo/vector-icons';
 import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
-import { Alert, Dimensions, ScrollView, StyleSheet, View } from "react-native";
+import { Alert, Dimensions, ScrollView, StyleSheet, TouchableOpacity, View } from "react-native";
 import BannerTopo from "../../components/BannerTopo";
 import Post from "../../components/Post";
 import { useAuth } from "../../hooks/useAuth";
@@ -58,7 +59,13 @@ export default function Community() {
                 ))}
                 <View style={styles.blocoInvisivel}/>
             </ScrollView>
-            
+            <View style={styles.adicionarPost}>
+                <TouchableOpacity 
+                    style={styles.bolinhaPost} 
+                >
+                    <Icon name="add" size={30} color="#fff" />
+                </TouchableOpacity>
+            </View>
         </View>
 
     );
@@ -83,5 +90,21 @@ const styles = StyleSheet.create({
     blocoInvisivel: {
         height: height * 0.2,
         width: '100%'
+    },
+    adicionarPost: {
+        position: 'absolute',
+        borderRadius: 9999,
+        bottom: height * 0.135,
+        right: width * 0.067,
+        elevation: 5,
+        boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+    },
+    bolinhaPost: {
+        borderRadius: 9999,
+        width: width * 0.15,
+        height: width * 0.15,
+        backgroundColor: '#257D3C',
+        justifyContent: 'center',
+        alignItems: 'center',
     }
 })
